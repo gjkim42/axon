@@ -66,9 +66,14 @@ verify: controller-gen ## Verify everything is up-to-date and correct.
 
 ##@ Build
 
+WHAT ?= cmd/...
+
 .PHONY: build
-build: ## Build manager binary.
-	go build -o bin/manager ./cmd/manager
+build: ## Build binaries (use WHAT=cmd/axon to build specific binary).
+	@for dir in $$(go list ./$(WHAT)); do \
+		bin_name=$$(basename $$dir); \
+		go build -o bin/$$bin_name $$dir; \
+	done
 
 .PHONY: run
 run: ## Run a controller from your host.
