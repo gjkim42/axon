@@ -95,6 +95,95 @@ kubectl apply -f task.yaml
 kubectl get tasks -w
 ```
 
+## CLI Usage
+
+Axon provides a CLI tool `axonctl` for easier task management without writing YAML files.
+
+### Installation
+
+Build the CLI:
+```bash
+make build
+# The binary will be available at bin/axonctl
+```
+
+Or build just the CLI:
+```bash
+go build -o bin/axonctl ./cmd/axonctl
+```
+
+### CLI Commands
+
+#### Create a Task
+
+```bash
+# Create a task with API key authentication
+axonctl create --type claude-code \
+  --prompt "Create a hello world program in Python" \
+  --cred-type api-key \
+  --secret anthropic-api-key
+
+# Create a task with OAuth and custom model
+axonctl create --type claude-code \
+  --prompt "Fix the bug in main.go" \
+  --cred-type oauth \
+  --secret claude-oauth \
+  --model claude-sonnet-4-20250514 \
+  --name my-task
+```
+
+#### List Tasks
+
+```bash
+# List tasks in default namespace
+axonctl list
+
+# List tasks in specific namespace
+axonctl list -n my-namespace
+
+# List tasks in all namespaces
+axonctl list --all-namespaces
+```
+
+#### Get Task Details
+
+```bash
+# Get detailed information about a task
+axonctl get my-task
+
+# Get task details in a different namespace
+axonctl get my-task -n my-namespace
+```
+
+#### Get Task Logs
+
+```bash
+# Get logs from a task's pod
+axonctl logs my-task
+
+# Follow logs
+axonctl logs my-task -f
+
+# Get last 50 lines
+axonctl logs my-task --tail=50
+```
+
+#### Delete a Task
+
+```bash
+# Delete a task
+axonctl delete my-task
+
+# Delete a task in specific namespace
+axonctl delete my-task -n my-namespace
+```
+
+#### Version
+
+```bash
+axonctl version
+```
+
 ## Task Spec
 
 | Field | Description | Required |
@@ -128,7 +217,7 @@ make test        # unit tests
 make test-e2e    # e2e tests
 
 # Build
-make build       # binary
+make build       # binaries (manager and axonctl)
 make image       # docker image
 ```
 

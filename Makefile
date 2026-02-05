@@ -67,8 +67,9 @@ verify: controller-gen ## Verify everything is up-to-date and correct.
 ##@ Build
 
 .PHONY: build
-build: ## Build manager binary.
+build: ## Build manager and CLI binaries.
 	go build -o bin/manager ./cmd/manager
+	go build -o bin/axonctl ./cmd/axonctl
 
 .PHONY: run
 run: ## Run a controller from your host.
