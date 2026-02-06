@@ -13,9 +13,25 @@ import (
 
 func newDeleteCommand(cfg *ClientConfig) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "delete <name>",
-		Short: "Delete a task",
-		Args:  cobra.ExactArgs(1),
+		Use:   "delete",
+		Short: "Delete resources",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.Help()
+			return fmt.Errorf("must specify a resource type")
+		},
+	}
+
+	cmd.AddCommand(newDeleteTaskCommand(cfg))
+
+	return cmd
+}
+
+func newDeleteTaskCommand(cfg *ClientConfig) *cobra.Command {
+	return &cobra.Command{
+		Use:     "task <name>",
+		Aliases: []string{"tasks"},
+		Short:   "Delete a task",
+		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cl, ns, err := cfg.NewClient()
 			if err != nil {
@@ -36,6 +52,4 @@ func newDeleteCommand(cfg *ClientConfig) *cobra.Command {
 			return nil
 		},
 	}
-
-	return cmd
 }
