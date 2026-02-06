@@ -79,7 +79,7 @@ var _ = Describe("CLI", func() {
 		Expect(logs).NotTo(BeEmpty())
 
 		By("deleting task via CLI")
-		axon("delete", cliTaskName)
+		axon("delete", "task", cliTaskName)
 
 		By("verifying task is no longer listed")
 		output = axonOutput("get", "tasks")
@@ -139,11 +139,21 @@ var _ = Describe("CLI", func() {
 		Expect(logs).NotTo(BeEmpty())
 
 		By("deleting task via CLI")
-		axon("delete", cliWorkspaceTaskName)
+		axon("delete", "task", cliWorkspaceTaskName)
 
 		By("verifying task is no longer listed")
 		output = axonOutput("get", "tasks")
 		Expect(output).NotTo(ContainSubstring(cliWorkspaceTaskName))
+	})
+})
+
+var _ = Describe("delete", func() {
+	It("should fail without a resource type", func() {
+		axonFail("delete")
+	})
+
+	It("should fail for a nonexistent task", func() {
+		axonFail("delete", "task", "nonexistent-task-name")
 	})
 })
 
