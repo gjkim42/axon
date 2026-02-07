@@ -95,6 +95,9 @@ var _ = BeforeSuite(func() {
 	Eventually(func() error {
 		return k8sClient.List(ctx, &axonv1alpha1.WorkspaceList{})
 	}, 30*time.Second, 100*time.Millisecond).Should(Succeed())
+	Eventually(func() error {
+		return k8sClient.List(ctx, &axonv1alpha1.UserList{})
+	}, 30*time.Second, 100*time.Millisecond).Should(Succeed())
 })
 
 var _ = AfterSuite(func() {
