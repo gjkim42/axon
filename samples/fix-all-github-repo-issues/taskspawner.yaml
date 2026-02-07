@@ -1,0 +1,19 @@
+apiVersion: axon.io/v1alpha1
+kind: TaskSpawner
+metadata:
+  name: fix-bugs
+spec:
+  when:
+    githubIssues:
+      workspaceRef:
+        name: my-workspace
+      labels: [bug]
+      state: open
+  taskTemplate:
+    type: claude-code
+    credentials:
+      type: oauth
+      secretRef:
+        name: claude-credentials
+    promptTemplate: "Fix: {{.Title}}\n{{.Body}}"
+  pollInterval: 5m

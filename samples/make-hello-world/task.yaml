@@ -1,0 +1,13 @@
+apiVersion: axon.io/v1alpha1
+kind: Task
+metadata:
+  name: hello-world
+spec:
+  type: claude-code
+  prompt: "Create a hello world program in Python"
+  credentials:
+    type: oauth
+    secretRef:
+      name: claude-oauth
+  workspaceRef:
+    name: my-workspace
