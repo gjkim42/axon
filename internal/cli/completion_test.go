@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"bytes"
 	"strings"
 	"testing"
 
@@ -116,6 +117,93 @@ func TestFlagCompletionCredentialType(t *testing.T) {
 	if !strings.Contains(output, ":4") {
 		t.Errorf("expected ShellCompDirectiveNoFileComp (:4) in output, got %q", output)
 	}
+}
+
+func TestCompletionCommand_Bash(t *testing.T) {
+	cmd := NewRootCommand()
+	var out bytes.Buffer
+	cmd.SetOut(&out)
+	cmd.SetArgs([]string{"completion", "bash"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(out.String(), "bash completion") {
+		t.Error("expected bash completion output")
+	}
+}
+
+func TestCompletionCommand_Zsh(t *testing.T) {
+	cmd := NewRootCommand()
+	var out bytes.Buffer
+	cmd.SetOut(&out)
+	cmd.SetArgs([]string{"completion", "zsh"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if out.Len() == 0 {
+		t.Error("expected non-empty zsh completion output")
+	}
+}
+
+func TestCompletionCommand_Fish(t *testing.T) {
+	cmd := NewRootCommand()
+	var out bytes.Buffer
+	cmd.SetOut(&out)
+	cmd.SetArgs([]string{"completion", "fish"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if out.Len() == 0 {
+		t.Error("expected non-empty fish completion output")
+	}
+}
+
+func TestCompletionCommand_Powershell(t *testing.T) {
+	cmd := NewRootCommand()
+	var out bytes.Buffer
+	cmd.SetOut(&out)
+	cmd.SetArgs([]string{"completion", "powershell"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if out.Len() == 0 {
+		t.Error("expected non-empty powershell completion output")
+	}
+}
+
+func TestCompletionCommand_InvalidShell(t *testing.T) {
+	cmd := NewRootCommand()
+	cmd.SetArgs([]string{"completion", "invalid"})
+	if err := cmd.Execute(); err == nil {
+		t.Fatal("expected error for invalid shell")
+	}
+}
+
+func TestCompletionCommand_NoArgs(t *testing.T) {
+	cmd := NewRootCommand()
+	cmd.SetArgs([]string{"completion"})
+	if err := cmd.Execute(); err == nil {
+		t.Fatal("expected error when no shell specified")
+	}
+}
+
+func TestCompletionCommand_ValidArgs(t *testing.T) {
+	cmd := NewRootCommand()
+	for _, sub := range cmd.Commands() {
+		if sub.Name() == "completion" {
+			if len(sub.ValidArgs) != 4 {
+				t.Fatalf("expected 4 valid args, got %d", len(sub.ValidArgs))
+			}
+			expected := map[string]bool{"bash": true, "zsh": true, "fish": true, "powershell": true}
+			for _, arg := range sub.ValidArgs {
+				if !expected[arg] {
+					t.Errorf("unexpected valid arg: %s", arg)
+				}
+			}
+			return
+		}
+	}
+	t.Fatal("completion subcommand not found")
 }
 
 func findSubcommand(t *testing.T, root *cobra.Command, path []string) *cobra.Command {

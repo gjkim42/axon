@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -62,4 +63,66 @@ func completeTaskSpawnerNames(cfg *ClientConfig) cobra.CompletionFunc {
 		}
 		return names, cobra.ShellCompDirectiveNoFileComp
 	}
+}
+
+func newCompletionCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "completion [bash|zsh|fish|powershell]",
+		Short: "Generate shell completion scripts",
+		Long: `Generate shell completion scripts for axon.
+
+To load completions:
+
+Bash:
+  $ source <(axon completion bash)
+
+  # To load completions for each session, execute once:
+  # Linux:
+  $ axon completion bash > /etc/bash_completion.d/axon
+  # macOS:
+  $ axon completion bash > $(brew --prefix)/etc/bash_completion.d/axon
+
+Zsh:
+  # If shell completion is not already enabled in your environment,
+  # you will need to enable it. You can execute the following once:
+  $ echo "autoload -U compinit; compinit" >> ~/.zshrc
+
+  # To load completions for each session, execute once:
+  $ axon completion zsh > "${fpath[1]}/_axon"
+
+  # You will need to start a new shell for this setup to take effect.
+
+Fish:
+  $ axon completion fish | source
+
+  # To load completions for each session, execute once:
+  $ axon completion fish > ~/.config/fish/completions/axon.fish
+
+PowerShell:
+  PS> axon completion powershell | Out-String | Invoke-Expression
+
+  # To load completions for every new session, run:
+  PS> axon completion powershell > axon.ps1
+  # and source this file from your PowerShell profile.
+`,
+		DisableFlagsInUseLine: true,
+		ValidArgs:             []string{"bash", "zsh", "fish", "powershell"},
+		Args:                  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			out := cmd.OutOrStdout()
+			switch args[0] {
+			case "bash":
+				return cmd.Root().GenBashCompletionV2(out, true)
+			case "zsh":
+				return cmd.Root().GenZshCompletion(out)
+			case "fish":
+				return cmd.Root().GenFishCompletion(out, true)
+			case "powershell":
+				return cmd.Root().GenPowerShellCompletionWithDesc(out)
+			}
+			return fmt.Errorf("unsupported shell: %s", args[0])
+		},
+	}
+
+	return cmd
 }
