@@ -20,9 +20,10 @@ func newLogsCommand(cfg *ClientConfig) *cobra.Command {
 	var follow bool
 
 	cmd := &cobra.Command{
-		Use:   "logs <name>",
-		Short: "View logs from a task's pod",
-		Args:  cobra.ExactArgs(1),
+		Use:               "logs <name>",
+		Short:             "View logs from a task's pod",
+		Args:              cobra.ExactArgs(1),
+		ValidArgsFunction: taskCompletionFunc(cfg),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cl, ns, err := cfg.NewClient()
 			if err != nil {

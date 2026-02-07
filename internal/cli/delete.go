@@ -28,10 +28,11 @@ func newDeleteCommand(cfg *ClientConfig) *cobra.Command {
 
 func newDeleteTaskCommand(cfg *ClientConfig) *cobra.Command {
 	return &cobra.Command{
-		Use:     "task <name>",
-		Aliases: []string{"tasks"},
-		Short:   "Delete a task",
-		Args:    cobra.ExactArgs(1),
+		Use:               "task <name>",
+		Aliases:           []string{"tasks"},
+		Short:             "Delete a task",
+		Args:              cobra.ExactArgs(1),
+		ValidArgsFunction: taskCompletionFunc(cfg),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cl, ns, err := cfg.NewClient()
 			if err != nil {

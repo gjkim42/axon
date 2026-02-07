@@ -16,7 +16,7 @@ func NewRootCommand() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			if cmd.Name() == "init" {
+			if cmd.Name() == "init" || cmd.Name() == "completion" {
 				return nil
 			}
 
@@ -43,6 +43,7 @@ func NewRootCommand() *cobra.Command {
 		newLogsCommand(cfg),
 		newDeleteCommand(cfg),
 		newInitCommand(cfg),
+		newCompletionCommand(),
 	)
 
 	return cmd

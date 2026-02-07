@@ -146,6 +146,9 @@ func newRunCommand(cfg *ClientConfig) *cobra.Command {
 	cmd.Flags().BoolVarP(&watch, "watch", "w", false, "watch task status after creation")
 
 	cmd.MarkFlagRequired("prompt")
+	cmd.RegisterFlagCompletionFunc("credential-type", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return []string{"api-key", "oauth"}, cobra.ShellCompDirectiveNoFileComp
+	})
 
 	return cmd
 }

@@ -29,10 +29,11 @@ func newGetCommand(cfg *ClientConfig) *cobra.Command {
 
 func newGetTaskSpawnerCommand(cfg *ClientConfig) *cobra.Command {
 	return &cobra.Command{
-		Use:     "taskspawner [name]",
-		Aliases: []string{"taskspawners", "ts"},
-		Short:   "List task spawners or get details of a specific task spawner",
-		Args:    cobra.MaximumNArgs(1),
+		Use:               "taskspawner [name]",
+		Aliases:           []string{"taskspawners", "ts"},
+		Short:             "List task spawners or get details of a specific task spawner",
+		Args:              cobra.MaximumNArgs(1),
+		ValidArgsFunction: taskSpawnerCompletionFunc(cfg),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cl, ns, err := cfg.NewClient()
 			if err != nil {
@@ -64,10 +65,11 @@ func newGetTaskCommand(cfg *ClientConfig) *cobra.Command {
 	var output string
 
 	cmd := &cobra.Command{
-		Use:     "task [name]",
-		Aliases: []string{"tasks"},
-		Short:   "List tasks or get details of a specific task",
-		Args:    cobra.MaximumNArgs(1),
+		Use:               "task [name]",
+		Aliases:           []string{"tasks"},
+		Short:             "List tasks or get details of a specific task",
+		Args:              cobra.MaximumNArgs(1),
+		ValidArgsFunction: taskCompletionFunc(cfg),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if output != "" && output != "yaml" && output != "json" {
 				return fmt.Errorf("unknown output format %q: must be one of yaml, json", output)
@@ -117,6 +119,9 @@ func newGetTaskCommand(cfg *ClientConfig) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&output, "output", "o", "", "Output format (yaml or json)")
+	cmd.RegisterFlagCompletionFunc("output", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return []string{"yaml", "json"}, cobra.ShellCompDirectiveNoFileComp
+	})
 
 	return cmd
 }
