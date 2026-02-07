@@ -84,6 +84,7 @@ spec:
                   automatically deleted after the given number of seconds once it reaches
                   a terminal phase, allowing TaskSpawner to create a new Task.
                 format: int32
+                minimum: 0
                 type: integer
               type:
                 description: Type specifies the agent type (e.g., claude-code).
@@ -237,6 +238,7 @@ spec:
                       automatically deleted after the given number of seconds once they reach
                       a terminal phase, allowing TaskSpawner to create a new Task.
                     format: int32
+                    minimum: 0
                     type: integer
                   type:
                     description: Type specifies the agent type (e.g., claude-code).

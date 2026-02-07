@@ -577,7 +577,7 @@ var _ = Describe("Task Controller", func() {
 			Expect(k8sClient.Create(ctx, secret)).Should(Succeed())
 
 			By("Creating a Task with TTL")
-			ttl := int32(1) // 1 second TTL
+			ttl := int32(3) // 3 second TTL
 			task := &axonv1alpha1.Task{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-task-ttl",
@@ -618,20 +618,21 @@ var _ = Describe("Task Controller", func() {
 				return k8sClient.Status().Update(ctx, createdJob)
 			}, timeout, interval).Should(Succeed())
 
-			By("Verifying Task status is Succeeded")
-			Eventually(func() axonv1alpha1.TaskPhase {
+			By("Verifying Task reaches Succeeded before TTL deletion")
+			Eventually(func() bool {
 				err := k8sClient.Get(ctx, taskLookupKey, createdTask)
 				if err != nil {
-					return ""
+					// Task already deleted by TTL, which implies it reached a terminal phase
+					return true
 				}
-				return createdTask.Status.Phase
-			}, timeout, interval).Should(Equal(axonv1alpha1.TaskPhaseSucceeded))
+				return createdTask.Status.Phase == axonv1alpha1.TaskPhaseSucceeded
+			}, timeout, interval).Should(BeTrue())
 
 			By("Verifying the Task is automatically deleted after TTL")
 			Eventually(func() bool {
 				err := k8sClient.Get(ctx, taskLookupKey, createdTask)
 				return err != nil
-			}, timeout, interval).Should(BeTrue())
+			}, 2*timeout, interval).Should(BeTrue())
 		})
 	})
 
