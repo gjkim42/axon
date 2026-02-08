@@ -10,6 +10,8 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -65,6 +67,19 @@ func restoreCRDs(kubeconfigPath string) {
 		err := k8sClient.Get(ctx, types.NamespacedName{Name: "axon-system"}, &corev1.Namespace{})
 		return apierrors.IsNotFound(err)
 	}, 30*time.Second, 100*time.Millisecond).Should(BeTrue())
+
+	// Wait for all CRDs to be fully deleted before reinstalling. If install's
+	// server-side apply patches a CRD that still has a deletionTimestamp, the
+	// patch succeeds but the CRD is still deleted, leaving the API unavailable.
+	crdGVK := schema.GroupVersionKind{Group: "apiextensions.k8s.io", Version: "v1", Kind: "CustomResourceDefinition"}
+	for _, name := range []string{"tasks.axon.io", "taskspawners.axon.io", "workspaces.axon.io"} {
+		Eventually(func() bool {
+			crd := &unstructured.Unstructured{}
+			crd.SetGroupVersionKind(crdGVK)
+			err := k8sClient.Get(ctx, types.NamespacedName{Name: name}, crd)
+			return apierrors.IsNotFound(err)
+		}, 30*time.Second, 100*time.Millisecond).Should(BeTrue())
+	}
 
 	reinstall := cli.NewRootCommand()
 	reinstall.SetArgs([]string{"install", "--kubeconfig", kubeconfigPath})
